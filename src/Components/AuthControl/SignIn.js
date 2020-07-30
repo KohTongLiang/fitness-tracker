@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { withFirebase } from '../Firebase';
 import { Container, FormGroup, makeStyles, FormControl, Button,
      Input, InputLabel, FormHelperText, Snackbar, Box } from '@material-ui/core';

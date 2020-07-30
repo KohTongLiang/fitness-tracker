@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { AppBar, Toolbar, Typography, IconButton, Drawer, List,
-Divider, ListItem, ListItemIcon, ListItemText, makeStyles, Menu, MenuItem } from '@material-ui/core';
-import { Menu as MenuIcon, AccountCircle, Home as HomeIcon, FitnessCenter as FitnessCenterIcon  } from '@material-ui/icons';
+Divider, ListItem, ListItemIcon, ListItemText, makeStyles, Menu, MenuItem,
+SwipeableDrawer } from '@material-ui/core';
+import { Menu as MenuIcon, AccountCircle, Home as HomeIcon, FitnessCenter as FitnessCenterIcon, Event as EventIcon  } from '@material-ui/icons';
 
 import * as VALUES from '../../Constants/values';
 import * as ROUTES from '../../Constants/routes';
@@ -68,7 +69,7 @@ const Navigation = () => {
                         <MenuIcon />
                         </IconButton>
                         <div>
-                            <Drawer anchor={'left'} open={state['left']} onClose={toggleDrawer('left', false)}>
+                            <SwipeableDrawer anchor={'left'} open={state['left']} onClose={toggleDrawer('left', false)}>
                             <div
                                 className={classes.list}
                                 role="presentation"
@@ -85,19 +86,29 @@ const Navigation = () => {
                                         </ListItemText>
                                     </ListItem>
                                     {authUser && (
-                                    <ListItem>
-                                        <ListItemIcon>
-                                            <FitnessCenterIcon />
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            <Link to={ROUTES.WORKOUT}>Workout</Link>
-                                        </ListItemText>
-                                    </ListItem>
+                                        <div>
+                                            <ListItem>
+                                                <ListItemIcon>
+                                                    <FitnessCenterIcon />
+                                                </ListItemIcon>
+                                                <ListItemText>
+                                                    <Link to={ROUTES.WORKOUT}>Workout</Link>
+                                                </ListItemText>
+                                            </ListItem>
+                                            <ListItem>
+                                                <ListItemIcon>
+                                                    <EventIcon />
+                                                </ListItemIcon>
+                                                <ListItemText>
+                                                    <Link to={ROUTES.SCHEDULE}>Schedule</Link>
+                                                </ListItemText>
+                                            </ListItem>
+                                        </div>
                                     )}
                                 </List>
                                 <Divider />
                             </div>
-                            </Drawer>
+                            </SwipeableDrawer>
                         </div>
                         <Typography variant="h6" className={classes.title}>
                             {VALUES.APPNAME}

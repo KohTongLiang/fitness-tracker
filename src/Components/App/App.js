@@ -6,6 +6,7 @@ import WorkoutPage from '../Workout';
 import HomePage from '../Home';
 import SignInPage from '../AuthControl/SignIn';
 import SignUpPage from '../AuthControl/SignUp';
+import SchedulePage from '../Schedule';
 
 import { withAuthentication } from '../Session';
 import * as ROUTES from '../../Constants/routes';
@@ -17,6 +18,7 @@ const App = () => (
     <Route path={ROUTES.WORKOUT} component={WorkoutPage} />
     <Route path={ROUTES.SIGN_IN} component={SignInPage} />
     <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
+    <Route path={ROUTES.SCHEDULE} component={SchedulePage} />
   </Router>
 )
 

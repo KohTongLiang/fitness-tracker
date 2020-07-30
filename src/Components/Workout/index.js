@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import momentDuration from 'moment-duration-format';
 import CreateWorkoutForm from './CreateWorkout';
+
 import {  withAuthorization } from '../Session';
-import { Box, Container, IconButton, Fab, Card, CardContent,
-  DialogTitle, DialogActions, Button, Typography, Dialog,
-  DialogContent, LinearProgress  } from '@material-ui/core';
+import { Container, IconButton, Fab, Card, CardContent,
+  Slide, Typography, Dialog,
+  DialogContent, LinearProgress, AppBar, Toolbar, Grid } from '@material-ui/core';
 import { Add as AddIcon, PlayArrow as PlayArrowIcon, Delete as DeleteIcon,
-Edit as EditIcon } from '@material-ui/icons';
+Edit as EditIcon, Close as CloseIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
 const style = theme => ({
+  workoutScreen: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   fab: {
     margin: 0,
     top: 'auto',
@@ -25,13 +30,16 @@ const style = theme => ({
     width: '80%',
     right: '10%',
     left: 'auto',
-    boxShadow: 20,
   },
-  paper: {
-    margin: theme.spacing(1)
+  appBar: {
+    position: 'relative',
+  },
+  dialogTitle: {
+    marginLeft: theme.spacing(2),
+    flex: 1,
   },
   form: {
-    padding: 10
+    padding: 20
   },
   root: {
     display: 'flex',
@@ -41,10 +49,7 @@ const style = theme => ({
     flex: '1 0 auto',
   },
   controls: {
-    display: 'flex',
     alignItems: 'right',
-    right: 10,
-    left: 'auto',
     paddingLeft: theme.spacing(1),
     paddingBottom: theme.spacing(1),
   },
@@ -55,7 +60,15 @@ const style = theme => ({
   details: {
     display: 'flex',
     flexDirection: 'row',
+    flex: 1,
   },
+  centerText: {
+    textAlign: 'center'
+  },
+});
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
 });
 
 function Workout (props) {
@@ -64,12 +77,14 @@ function Workout (props) {
   const [error, setError] = useState('')
   const [intervalTime, setIntervalTime] = useState([]);
   const [intervalRemaining, setIntervalRemaining] = useState(0);
+  const [totalWork, setTotalWork] = useState(0);
   const [totalRemaining, setTotalRemaining] = useState(0);
   const [intervalTitle, setIntervalTitle] = useState([]);
+  const [workout, setWorkout] = useState({});
   const [intervalStage, setIntervalStage] = useState(0);
   const [workoutScreen, setWorkoutScreen] = useState(false);
   const dbRef = props.firebase.getFirestore().collection('users').doc(props.uid).collection('workouts');
-
+  const history = props.firebase.getFirestore().collection('users').doc(props.uid).collection('history');
   const { classes } = props;
 
   useEffect(() => {
@@ -78,7 +93,7 @@ function Workout (props) {
       snapshot.forEach (e => {
         workouts.push({
           id: e.id,
-          data: e.data()
+          data: e.data(),
           });
       });
       
@@ -90,7 +105,22 @@ function Workout (props) {
 
   useEffect(() => {
     if (workoutScreen) {
-      setIntervalRemaining(intervalTime[intervalStage]);
+      if (isNaN(intervalTime[intervalStage])) {
+        history.add({
+          doneOn: moment().format("YYYY-MM-DD HH:mm:ss"),
+          workoutId: workout,
+          totalWork: totalWork,
+        });
+
+        setWorkoutScreen(false);
+        setIntervalStage(0);
+        setTotalRemaining(0);
+        setIntervalRemaining(0);
+        setTotalWork(0);
+        setWorkout({});
+      } else {
+        setIntervalRemaining(intervalTime[intervalStage]);
+      }
     }
   }, [workoutScreen, intervalStage]);
 
@@ -107,6 +137,7 @@ function Workout (props) {
         window.navigator.vibrate(500);
       } else if (intervalRemaining <= 0) {
         window.navigator.vibrate(1000);
+
         setIntervalStage(intervalStage => intervalStage + 1);
       }
       return () => clearInterval(interval);
@@ -115,14 +146,16 @@ function Workout (props) {
       setIntervalStage(0);
       setTotalRemaining(0);
       setIntervalRemaining(0);
+      setTotalWork(0);
     }
     return () => clearInterval(interval);
   }, [intervalRemaining]);
 
-
-  const startWorkout = workoutObject => {
+  const startWorkout = workout => {
+    const workoutObject = workout.data;
     setIntervalTime([]);
     setIntervalTitle([]);
+    setWorkout(workout.id);
     setIntervalTitle(intervalTitle => [...intervalTitle, 'Warmup'])
     setIntervalTime(intervalTime => [ ...intervalTime, workoutObject.warmup]);
     setTotalRemaining(totalRemaining => totalRemaining + parseInt(workoutObject.warmup));
@@ -132,6 +165,7 @@ function Workout (props) {
         setIntervalTitle(intervalTitle => [...intervalTitle, 'Work'])
         setIntervalTime(intervalTime => [...intervalTime, workoutObject.work]);
         setTotalRemaining(totalRemaining => totalRemaining + parseInt(workoutObject.work));
+        setTotalWork(totalWork => totalWork + parseInt(workoutObject.work));
 
         if (workoutObject.noOfCycles - j > 1) {
           setIntervalTitle(intervalTitle => [...intervalTitle, 'Rest'])
@@ -162,70 +196,76 @@ function Workout (props) {
     setCreateFormShow(false);
   }
 
-  const editWorkout = workout => {
-    console.log(workout);
-  }
-
   const deleteWorkout = workoutId => {
     dbRef.doc(workoutId).delete();
   }
 
   return (
-  <Box>
-      <Container>
-        <CreateWorkoutForm {...props} createFormShow={createFormShow} submitWorkout={submitWorkout}
-        closeForm={() => showCreatePage(!createFormShow)}/>
-
-        {error && <p>{error}</p>}
-
-        {workoutList &&  workoutList.map(workout => (
-          <Card key={workout.id} className={classes.root}>
-            <div className={classes.details}>
-              <CardContent className={classes.content}>
-                <Typography component="h5" variant="h5">
-                  {workout.data.workoutName}
-                </Typography>
-              </CardContent>
-            </div>
-            <div className={classes.controls}>
-              <IconButton onClick={() => startWorkout(workout.data)} aria-label="play/pause">
-                <PlayArrowIcon className={classes.playIcon} />
-              </IconButton>
-              <IconButton onClick={() => editWorkout(workout)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton onClick={() => deleteWorkout(workout.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </div>
-          </Card>
-        ))}
-
-        <Dialog open={workoutScreen} fullWidth fullscreen='true'>
-          <DialogTitle>
-           <div> {intervalTitle[intervalStage]}</div>
-           <div> Next: {intervalTitle[intervalStage+1] && <span>{intervalTitle[intervalStage+1]}</span>} </div>
-           <div> Time Remaining: {moment.duration(totalRemaining, 'seconds').format("hh:mm:ss")} </div>
-          </DialogTitle>
-          <DialogContent>
-            <Typography component="h1" variant="h1">
-              {intervalRemaining}
-            </Typography>
-            <LinearProgress  variant="determinate" value={(intervalRemaining / intervalTime[intervalStage]) * 100} />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setWorkoutScreen(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-
-      </Container>
-      <Fab color="primary" onClick={() => showCreatePage(!createFormShow)} className={classes.fab} aria-label="add">
-          <AddIcon />
-      </Fab>
-  </Box>
+  <div>
+    <Container>
+      {error && <p>{error}</p>}
+      {workoutList &&  workoutList.map(workout => (
+        <Card key={workout.id} className={classes.root}>
+          <div className={classes.details}>
+            <CardContent className={classes.content}>
+              <Typography component="h5" variant="h5">
+                {workout.data.workoutName}
+              </Typography>
+            </CardContent>
+          </div>
+          <div className={classes.controls}>
+            <IconButton onClick={() => startWorkout(workout)} aria-label="play/pause">
+              <PlayArrowIcon className={classes.playIcon} />
+            </IconButton>
+            <IconButton onClick={() => deleteWorkout(workout.id)}>
+              <DeleteIcon />
+            </IconButton>
+          </div>
+        </Card>
+      ))}
+      <Dialog open={workoutScreen} fullScreen TransitionComponent={Transition}>
+        <AppBar className={classes.appBar}>
+              <Toolbar>
+                  <IconButton edge="start" color="inherit" onClick={() => setWorkoutScreen(false)} aria-label="close">
+                      <CloseIcon />
+                  </IconButton>
+                  <Typography variant="h6" className={classes.dialogTitle}>
+                      Workout
+                  </Typography>
+              </Toolbar>
+        </AppBar>
+        <DialogContent className={classes.workoutScreen}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Typography component="h3" variant="h3" className={classes.centerText}>
+                {moment.duration(totalRemaining, 'seconds').format("hh:mm:ss")}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography component="h3" variant="h3" className={classes.centerText}>
+                {intervalTitle[intervalStage]} {intervalRemaining}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <LinearProgress  variant="determinate" value={(intervalRemaining / intervalTime[intervalStage]) * 100} />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography component="h4" variant="h4" className={classes.centerText}>
+                Next: {intervalTitle[intervalStage+1] && <span>{intervalTitle[intervalStage+1]} {intervalTime[intervalStage+1]}</span>}
+              </Typography>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
+    </Container>
+    <Fab color="primary" onClick={() => showCreatePage(!createFormShow)} className={classes.fab} aria-label="add">
+        <AddIcon />
+    </Fab>
+    <CreateWorkoutForm {...props} createFormShow={createFormShow} submitWorkout={submitWorkout}
+      closeForm={() => showCreatePage(false)}/>
+  </div>
   );
 }
 
 const condition = authUser => !!authUser;
-
 export default withAuthorization(condition)(withStyles(style)(Workout));

@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@date-io/date-fns": "^2.8.0",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/pickers": "^3.2.10",
     "@material-ui/styles": "^4.10.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
@@ -13,6 +15,7 @@
     "moment": "^2.27.0",
     "moment-duration-format": "^2.3.2",
     "react": "^16.13.1",
+    "react-big-calendar": "^0.26.0",
     "react-bootstrap": "^1.0.1",
     "react-countdown-circle-timer": "^2.2.2",
     "react-dom": "^16.13.1",
@@ -28,8 +31,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy" : "npm run build",
-    "deploy" : "firebase build"
+    "predeploy": "npm run build",
+    "deploy": "firebase build"
   },
   "eslintConfig": {
     "extends": "react-app"
