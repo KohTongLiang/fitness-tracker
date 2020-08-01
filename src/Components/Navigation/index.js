@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, IconButton, Drawer, List,
 Divider, ListItem, ListItemIcon, ListItemText, makeStyles, Menu, MenuItem,
 SwipeableDrawer } from '@material-ui/core';
-import { Menu as MenuIcon, AccountCircle, Home as HomeIcon, FitnessCenter as FitnessCenterIcon, Event as EventIcon  } from '@material-ui/icons';
+import { Menu as MenuIcon, AccountCircle, Home as HomeIcon, 
+    FitnessCenter as FitnessCenterIcon, Event as EventIcon,
+    Timeline as TimelineIcon } from '@material-ui/icons';
 
 import * as VALUES from '../../Constants/values';
 import * as ROUTES from '../../Constants/routes';
@@ -69,7 +71,7 @@ const Navigation = () => {
                         <MenuIcon />
                         </IconButton>
                         <div>
-                            <SwipeableDrawer anchor={'left'} open={state['left']} onClose={toggleDrawer('left', false)}>
+                            <SwipeableDrawer anchor={'left'} open={state['left']} onClose={toggleDrawer('left', false)} onOpen={toggleDrawer('left', true)}>
                             <div
                                 className={classes.list}
                                 role="presentation"
@@ -93,6 +95,14 @@ const Navigation = () => {
                                                 </ListItemIcon>
                                                 <ListItemText>
                                                     <Link to={ROUTES.WORKOUT}>Workout</Link>
+                                                </ListItemText>
+                                            </ListItem>
+                                            <ListItem>
+                                                <ListItemIcon>
+                                                    <TimelineIcon />
+                                                </ListItemIcon>
+                                                <ListItemText>
+                                                    <Link to={ROUTES.HISTORY}>History</Link>
                                                 </ListItemText>
                                             </ListItem>
                                             <ListItem>

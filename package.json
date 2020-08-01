@@ -12,6 +12,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "firebase": "^7.15.5",
+    "material-table": "^1.67.1",
     "moment": "^2.27.0",
     "moment-duration-format": "^2.3.2",
     "react": "^16.13.1",

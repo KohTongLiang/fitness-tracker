@@ -22,7 +22,7 @@ const SignInPage = (props) => {
 
     const onSubmit = data => {
         props.firebase.doSignInWithEmailAndPassword(data.email, data.password).then(() => {
-            props.history.push(ROUTES.HOME);
+            props.history.push(ROUTES.WORKOUT);
         })
         .catch(error => {
             setError(error.message);

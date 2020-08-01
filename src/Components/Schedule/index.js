@@ -46,27 +46,10 @@ function Schedule (props) {
     const { classes } = props;
     const historyRef = props.firebase.getFirestore().collection('users').doc(props.uid).collection('history');
     const workoutRef = props.firebase.getFirestore().collection('users').doc(props.uid).collection('workouts');
-    const [workoutHistory, setWorkoutHistory] = useState([]);
+    const [scheduleList, setScheduleList] = useState([]);
     const [addScheduleScreen, setAddScheduleScreen] = useState(false);
     const [workoutList, setWorkoutList] = useState([]);
     const {handleSubmit, control, errors, getValues, setValue } = useForm();
-
-    useEffect(() => {
-        const unsubscribe = historyRef.onSnapshot(snapshot => {
-          snapshot.forEach (e => {
-            const endDateTime = moment(e.data().doneOn).add(e.data().totalWork, 'seconds');
-
-            setWorkoutHistory(workoutHistory => [...workoutHistory, {
-                title: 'Workout',
-                start: new Date(e.data().doneOn.toString()),
-                end: new Date(endDateTime),
-                allDay: false,
-            }]);
-          });
-        });
-    
-        return unsubscribe;
-    }, []);
 
     useEffect(() => {
         if (addScheduleScreen) {
@@ -99,7 +82,7 @@ function Schedule (props) {
             <Container>
                 <Calendar 
                     localizer={localizer}
-                    events={workoutHistory}
+                    events={scheduleList}
                     startAccessor="start"
                     endAccessor="end"
                     style={{ height: 500 }}
